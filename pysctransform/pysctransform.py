@@ -474,6 +474,7 @@ def vst(
     correct_counts=False,
     exclude_poisson=False,
     fix_slope=False,
+    cell_attr=None,
     verbosity=0,
 ):
     """Perform variance stabilizing transformation.
@@ -538,7 +539,14 @@ def vst(
     genes_cell_count = npy.asarray((umi >= 0.01).sum(1))
     min_cells_genes_index = npy.squeeze(genes_cell_count >= min_cells)
     genes = gene_names[min_cells_genes_index]
-    cell_attr = make_cell_attr(umi, cell_names)
+
+    _cell_attr = make_cell_attr(umi, cell_names)
+    if not cell_attr is None:
+        assert (_cell_attr.index == cell_attr.index).all(), 'index of `cell_attr` is not equal to cell_names'
+        cell_attr = pd.concat([_cell_attr, cell_attr], axis=1)
+    else:
+        cell_attr = _cell_attr
+
     if isinstance(umi, pd.DataFrame):
         umi = umi.loc[genes]
     else:
